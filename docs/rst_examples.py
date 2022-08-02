@@ -19,19 +19,18 @@ import os
 import shutil
 
 def create_rst(filedir, filename, lang):
-    rst_content = '.. _{}_{}:'.format(lang, filename) + '\n\n{}\n'.format(filename) + '#' * len(filename) + '\n\n' + \
-    '.. literalinclude:: ../../../../examples/oneapi/{}/source/{}/{}\n'.format(lang, filedir, filename) + \
-    '  :language: cpp\n'
-
-    return(rst_content)
+    return (
+        f'.. _{lang}_{filename}:'
+        + f'\n\n{filename}\n'
+        + '#' * len(filename)
+        + '\n\n'
+        + f'.. literalinclude:: ../../../../examples/oneapi/{lang}/source/{filedir}/{filename}\n'
+    ) + '  :language: cpp\n'
 
 def list_examples(path):
     examples = []
     for root, dirs, files in os.walk(path):
-        for file in files:
-            if '.cpp' in file:
-                examples.append(os.path.join(root, file))
-
+        examples.extend(os.path.join(root, file) for file in files if '.cpp' in file)
     examples = [file.split(path)[1].split(os.sep)[1:] for file in examples]
 
     return(examples)

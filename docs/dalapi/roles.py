@@ -23,8 +23,7 @@ _term_ref_re = re.compile(r'(.+)<(.+)>', flags=re.DOTALL)
 def capterm_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     xref_role = roles.XRefRole(innernodeclass=nodes.inline,
                                warn_dangling=True)
-    term_match = _term_ref_re.match(text)
-    if term_match:
+    if term_match := _term_ref_re.match(text):
         txt, ref = term_match.group(1), term_match.group(2)
     else:
         txt, ref = text, text
@@ -54,7 +53,7 @@ def txtref_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
             words = extract_ref_words(ref)
             fixed_term = make_term_text(words, ref, suffix)
         else:
-            raise RuntimeError('Unexpected role syntax: ' + rawtext)
+            raise RuntimeError(f'Unexpected role syntax: {rawtext}')
     else:
         ref, words = text, extract_ref_words(text)
         fixed_term = make_term_text(words, ref)

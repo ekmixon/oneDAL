@@ -78,14 +78,14 @@ elif platform in ["win32", "win64"]:
     OTHER_LIBS = " "
     OTHER_OPTS = "/std:c++17 /MD"
 else:
-    raise RuntimeError("Not support OS {}".format(platform))
+    raise RuntimeError(f"Not support OS {platform}")
 
 def get_result_libs(is_static, is_threading, dal_libs):
     suffix = SUFF_STAT_LIB if is_static else SUFF_DYN_LIB
     out_lib = ["${{libdir}}{}{}{}{}".format('/', PREF_LIB, lib, suffix) for lib in dal_libs]
     res_dal_libs = " ".join(out_lib)
     res_thread_libs = TBB_LIBS if is_threading else ''
-    return res_dal_libs + ' ' + res_thread_libs + ' ' + OTHER_LIBS
+    return f'{res_dal_libs} {res_thread_libs} {OTHER_LIBS}'
 
 def generate(config):
     with open(config.template_name, 'r') as pkg_template_file:
@@ -95,7 +95,7 @@ def generate(config):
             pack_pkg_config = RESULT_PKG_CONFIGS[pkg_config]
             libs = get_result_libs(**pack_pkg_config)
             libdir = LIBDIR
-            opts = OTHER_OPTS + ' ' + '-I${includedir}'
+            opts = f'{OTHER_OPTS} ' + '-I${includedir}'
             result_content = pkg_template.format(libdir=libdir, libs=libs, opts=opts)
             if not os.path.exists(config.output_dir):
                 os.makedirs(config.output_dir)

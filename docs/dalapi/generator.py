@@ -37,7 +37,7 @@ class RstBuilder(object):
         self._add_name('enum-class', declaration, namespace, level)
 
     def add_param(self, tag: str, name: str, doc_text: str, level=0):
-        assert tag in ['param', 'tparam']
+        assert tag in {'param', 'tparam'}
         assert name
         assert doc_text
         formatted = self._format_text(doc_text)
@@ -62,7 +62,7 @@ class RstBuilder(object):
 
     def add_code_block(self, listing: List[Text], level=0):
         assert listing is not None
-        self(f'.. code-block:: cpp', level)
+        self('.. code-block:: cpp', level)
         self.add_blank_line()
         for line in listing:
             self(line, level + 1)

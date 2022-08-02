@@ -102,11 +102,11 @@ class DescriptionBuilder(_BuilderMixins):
         )
 
     def _remove_trailing_runs(self, runs):
-        end_index = - 1
-        for i in range(len(runs) - 1, -1, -1):
-            if runs[i].content.strip():
-               end_index = i
-               break
+        end_index = next(
+            (i for i in range(len(runs) - 1, -1, -1) if runs[i].content.strip()),
+            -1,
+        )
+
         return runs[:end_index + 1]
 
     @utils.return_list
@@ -135,11 +135,11 @@ class DescriptionBuilder(_BuilderMixins):
 class LocationBuilder(_BuilderMixins):
     def build(self):
         return model.Location(
-            file = self.src.file,
-            line = int(self.src.line) if self.src.line else None,
-            bodyfile = self.src.bodyfile if self.src.bodyfile else None,
-            bodystart = int(self.src.bodystart) if self.src.bodystart else None,
-            bodyend = int(self.src.bodyend) if self.src.bodyend else None,
+            file=self.src.file,
+            line=int(self.src.line) if self.src.line else None,
+            bodyfile=self.src.bodyfile or None,
+            bodystart=int(self.src.bodystart) if self.src.bodystart else None,
+            bodyend=int(self.src.bodyend) if self.src.bodyend else None,
         )
 
 
@@ -183,17 +183,16 @@ class ParameterBuilder(_BuilderMixins):
             except ValueError:
                 pass
         return model.Parameter(
-            name = name if name else None,
-            type = type_ if type_ else None,
-            default = default if default else None,
-            description = self._build_description(name),
+            name=name or None,
+            type=type_ or None,
+            default=default or None,
+            description=self._build_description(name),
         )
 
     def _build_description(self, param_name):
         try:
             doc = self._find_parent_doc()
-            param_desc = self._find_param_description(doc, param_name)
-            if param_desc:
+            if param_desc := self._find_param_description(doc, param_name):
                 return build(DescriptionBuilder, param_desc)
         except (AttributeError, IndexError):
             pass
@@ -303,11 +302,11 @@ class FunctionBuilder(_BuilderMixins):
     def _build_declaration(self, template_decl, qualifiers, return_type, name, argstring):
         decl = ''
         if template_decl:
-            decl += template_decl + ' '
+            decl += f'{template_decl} '
         if qualifiers:
-            decl += qualifiers + ' '
+            decl += f'{qualifiers} '
         if return_type:
-            decl += return_type + ' '
+            decl += f'{return_type} '
         decl += name + argstring
         return decl
 
@@ -357,7 +356,7 @@ class ClassBuilder(_BuilderMixins):
     def _build_declaration(self, template_decl, name):
         decl = ''
         if template_decl:
-            decl += template_decl + ' '
+            decl += f'{template_decl} '
         decl += f'class {name}'
         return decl
 
@@ -405,7 +404,7 @@ class TypedefBuilder(_BuilderMixins):
     def _build_declaration(self, template_decl, nob_template_decl):
         decl = ''
         if template_decl:
-            decl += template_decl + ' '
+            decl += f'{template_decl} '
         decl += nob_template_decl
         return decl
 

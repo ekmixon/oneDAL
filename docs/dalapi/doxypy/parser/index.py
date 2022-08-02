@@ -47,10 +47,7 @@ from lxml import etree as etree_
 
 Validate_simpletypes_ = True
 SaveElementTreeNode = True
-if sys.version_info.major == 2:
-    BaseStrType_ = basestring
-else:
-    BaseStrType_ = str
+BaseStrType_ = basestring if sys.version_info.major == 2 else str
 
 
 def parsexml_(infile, parser=None, **kwargs):
@@ -67,8 +64,7 @@ def parsexml_(infile, parser=None, **kwargs):
             infile = os.path.join(infile)
     except AttributeError:
         pass
-    doc = etree_.parse(infile, parser=parser, **kwargs)
-    return doc
+    return etree_.parse(infile, parser=parser, **kwargs)
 
 def parsexmlstring_(instring, parser=None, **kwargs):
     if parser is None:
@@ -79,8 +75,7 @@ def parsexmlstring_(instring, parser=None, **kwargs):
         except AttributeError:
             # fallback to xml.etree
             parser = etree_.XMLParser()
-    element = etree_.fromstring(instring, parser=parser, **kwargs)
-    return element
+    return etree_.fromstring(instring, parser=parser, **kwargs)
 
 #
 # Namespace prefix definition table (and other attributes, too)
@@ -140,10 +135,7 @@ except ImportError:
     class GdsCollector_(object):
 
         def __init__(self, messages=None):
-            if messages is None:
-                self.messages = []
-            else:
-                self.messages = messages
+            self.messages = [] if messages is None else messages
 
         def add_message(self, msg):
             self.messages.append(msg)
@@ -156,11 +148,11 @@ except ImportError:
 
         def print_messages(self):
             for msg in self.messages:
-                print("Warning: {}".format(msg))
+                print(f"Warning: {msg}")
 
         def write_messages(self, outstream):
             for msg in self.messages:
-                outstream.write("Warning: {}\n".format(msg))
+                outstream.write(f"Warning: {msg}\n")
 
 
 #
@@ -201,9 +193,7 @@ except ImportError as exp:
         def gds_parse_string(self, input_data, node=None, input_name=''):
             return input_data
         def gds_validate_string(self, input_data, node=None, input_name=''):
-            if not input_data:
-                return ''
-            return input_data
+            return input_data or ''
         def gds_format_base64(self, input_data, input_name=''):
             return base64.b64encode(input_data)
         def gds_validate_base64(self, input_data, node=None, input_name=''):
@@ -214,7 +204,7 @@ except ImportError as exp:
             try:
                 ival = int(input_data)
             except (TypeError, ValueError) as exp:
-                raise_parse_error(node, 'Requires integer value: %s' % exp)
+                raise_parse_error(node, f'Requires integer value: {exp}')
             return ival
         def gds_validate_integer(self, input_data, node=None, input_name=''):
             try:
@@ -223,7 +213,7 @@ except ImportError as exp:
                 raise_parse_error(node, 'Requires integer value')
             return value
         def gds_format_integer_list(self, input_data, input_name=''):
-            return '%s' % ' '.join(input_data)
+            return f"{' '.join(input_data)}"
         def gds_validate_integer_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -239,7 +229,7 @@ except ImportError as exp:
             try:
                 fval_ = float(input_data)
             except (TypeError, ValueError) as exp:
-                raise_parse_error(node, 'Requires float or double value: %s' % exp)
+                raise_parse_error(node, f'Requires float or double value: {exp}')
             return fval_
         def gds_validate_float(self, input_data, node=None, input_name=''):
             try:
@@ -248,7 +238,7 @@ except ImportError as exp:
                 raise_parse_error(node, 'Requires float value')
             return value
         def gds_format_float_list(self, input_data, input_name=''):
-            return '%s' % ' '.join(input_data)
+            return f"{' '.join(input_data)}"
         def gds_validate_float_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -259,7 +249,7 @@ except ImportError as exp:
                     raise_parse_error(node, 'Requires sequence of float values')
             return values
         def gds_format_decimal(self, input_data, input_name=''):
-            return_value = '%s' % input_data
+            return_value = f'{input_data}'
             if '.' in return_value:
                 return_value = return_value.rstrip('0')
                 if return_value.endswith('.'):
@@ -294,7 +284,7 @@ except ImportError as exp:
             try:
                 fval_ = float(input_data)
             except (TypeError, ValueError) as exp:
-                raise_parse_error(node, 'Requires double or float value: %s' % exp)
+                raise_parse_error(node, f'Requires double or float value: {exp}')
             return fval_
         def gds_validate_double(self, input_data, node=None, input_name=''):
             try:
@@ -303,7 +293,7 @@ except ImportError as exp:
                 raise_parse_error(node, 'Requires double or float value')
             return value
         def gds_format_double_list(self, input_data, input_name=''):
-            return '%s' % ' '.join(input_data)
+            return f"{' '.join(input_data)}"
         def gds_validate_double_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -315,7 +305,7 @@ except ImportError as exp:
                         node, 'Requires sequence of double or float values')
             return values
         def gds_format_boolean(self, input_data, input_name=''):
-            return ('%s' % input_data).lower()
+            return f'{input_data}'.lower()
         def gds_parse_boolean(self, input_data, node=None, input_name=''):
             if input_data in ('true', '1'):
                 bval = True
@@ -332,7 +322,7 @@ except ImportError as exp:
                     '(one of True, 1, False, 0)')
             return input_data
         def gds_format_boolean_list(self, input_data, input_name=''):
-            return '%s' % ' '.join(input_data)
+            return f"{' '.join(input_data)}"
         def gds_validate_boolean_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -399,9 +389,8 @@ except ImportError as exp:
                     input_data = input_data[:-6]
             time_parts = input_data.split('.')
             if len(time_parts) > 1:
-                micro_seconds = int(float('0.' + time_parts[1]) * 1000000)
-                input_data = '%s.%s' % (
-                    time_parts[0], "{}".format(micro_seconds).rjust(6, "0"), )
+                micro_seconds = int(float(f'0.{time_parts[1]}') * 1000000)
+                input_data = f'{time_parts[0]}.{f"{micro_seconds}".rjust(6, "0")}'
                 dt = datetime_.datetime.strptime(
                     input_data, '%Y-%m-%dT%H:%M:%S.%f')
             else:
@@ -497,7 +486,7 @@ except ImportError as exp:
                 found2 = False
                 for patterns2 in patterns1:
                     mo = re_.search(patterns2, target)
-                    if mo is not None and len(mo.group(0)) == len(target):
+                    if mo is not None and len(mo[0]) == len(target):
                         found2 = True
                         break
                 if not found2:
@@ -535,25 +524,20 @@ except ImportError as exp:
                 length = len(value)
             else:
                 length = 1
-            if required is not None :
-                if required and length < 1:
-                    self.gds_collector_.add_message(
-                        "Required value {}{} is missing".format(
-                            input_name, self.gds_get_node_lineno_()))
+            if required is not None and required and length < 1:
+                self.gds_collector_.add_message(
+                    f"Required value {input_name}{self.gds_get_node_lineno_()} is missing"
+                )
+
             if length < min_occurs:
                 self.gds_collector_.add_message(
-                    "Number of values for {}{} is below "
-                    "the minimum allowed, "
-                    "expected at least {}, found {}".format(
-                        input_name, self.gds_get_node_lineno_(),
-                        min_occurs, length))
+                    f"Number of values for {input_name}{self.gds_get_node_lineno_()} is below the minimum allowed, expected at least {min_occurs}, found {length}"
+                )
+
             elif length > max_occurs:
                 self.gds_collector_.add_message(
-                    "Number of values for {}{} is above "
-                    "the maximum allowed, "
-                    "expected at most {}, found {}".format(
-                        input_name, self.gds_get_node_lineno_(),
-                        max_occurs, length))
+                    f"Number of values for {input_name}{self.gds_get_node_lineno_()} is above the maximum allowed, expected at most {max_occurs}, found {length}"
+                )
         def gds_validate_builtin_ST_(
                 self, validator, value, input_name,
                 min_occurs=None, max_occurs=None, required=None):
@@ -576,14 +560,12 @@ except ImportError as exp:
             path_list = []
             self.get_path_list_(node, path_list)
             path_list.reverse()
-            path = '/'.join(path_list)
-            return path
+            return '/'.join(path_list)
         Tag_strip_pattern_ = re_.compile(r'\{.*\}')
         def get_path_list_(self, node, path_list):
             if node is None:
                 return
-            tag = GeneratedsSuper.Tag_strip_pattern_.sub('', node.tag)
-            if tag:
+            if tag := GeneratedsSuper.Tag_strip_pattern_.sub('', node.tag):
                 path_list.append(tag)
             self.get_path_list_(node.getparent(), path_list)
         def get_class_obj_(self, node, default_class=None):
@@ -605,29 +587,25 @@ except ImportError as exp:
             return content
         @classmethod
         def gds_reverse_node_mapping(cls, mapping):
-            return dict(((v, k) for k, v in mapping.items()))
+            return {v: k for k, v in mapping.items()}
         @staticmethod
         def gds_encode(instring):
             if sys.version_info.major == 2:
-                if ExternalEncoding:
-                    encoding = ExternalEncoding
-                else:
-                    encoding = 'utf-8'
+                encoding = ExternalEncoding or 'utf-8'
                 return instring.encode(encoding)
             return instring
         @staticmethod
         def convert_unicode(instring):
             if isinstance(instring, str):
-                result = quote_xml(instring)
+                return quote_xml(instring)
             elif sys.version_info.major == 2 and isinstance(instring, unicode):
-                result = quote_xml(instring).encode('utf8')
+                return quote_xml(instring).encode('utf8')
             else:
-                result = GeneratedsSuper.gds_encode(str(instring))
-            return result
+                return GeneratedsSuper.gds_encode(str(instring))
         def __eq__(self, other):
             def excl_select_objs_(obj):
-                return (obj[0] != 'parent_object_' and
-                        obj[0] != 'gds_collector_')
+                return obj[0] not in ['parent_object_', 'gds_collector_']
+
             if type(self) != type(other):
                 return False
             return all(x == y for x, y in zip_longest(
@@ -648,17 +626,14 @@ except ImportError as exp:
         def gds_get_node_lineno_(self):
             if (hasattr(self, "gds_elementtree_node_") and
                     self.gds_elementtree_node_ is not None):
-                return ' near line {}'.format(
-                    self.gds_elementtree_node_.sourceline)
+                return f' near line {self.gds_elementtree_node_.sourceline}'
             return ""
 
 
     def getSubclassFromModule_(module, class_):
         '''Get the subclass of a class from a specific module.'''
-        name = class_.__name__ + 'Sub'
-        if hasattr(module, name):
-            return getattr(module, name)
-        return None
+        name = f'{class_.__name__}Sub'
+        return getattr(module, name) if hasattr(module, name) else None
 
 
 #
@@ -701,7 +676,7 @@ CurrentSubclassModule_ = None
 
 def showIndent(outfile, level, pretty_print=True):
     if pretty_print:
-        for idx in range(level):
+        for _ in range(level):
             outfile.write('    ')
 
 
@@ -709,7 +684,7 @@ def quote_xml(inStr):
     "Escape markup chars, but do not modify CDATA sections."
     if not inStr:
         return ''
-    s1 = (isinstance(inStr, BaseStrType_) and inStr or '%s' % inStr)
+    s1 = isinstance(inStr, BaseStrType_) and inStr or f'{inStr}'
     s2 = ''
     pos = 0
     matchobjects = CDATA_pattern_.finditer(s1)
@@ -731,15 +706,12 @@ def quote_xml_aux(inStr):
 
 
 def quote_attrib(inStr):
-    s1 = (isinstance(inStr, BaseStrType_) and inStr or '%s' % inStr)
+    s1 = isinstance(inStr, BaseStrType_) and inStr or f'{inStr}'
     s1 = s1.replace('&', '&amp;')
     s1 = s1.replace('<', '&lt;')
     s1 = s1.replace('>', '&gt;')
     if '"' in s1:
-        if "'" in s1:
-            s1 = '"%s"' % s1.replace('"', "&quot;")
-        else:
-            s1 = "'%s'" % s1
+        s1 = '"%s"' % s1.replace('"', "&quot;") if "'" in s1 else "'%s'" % s1
     else:
         s1 = '"%s"' % s1
     return s1
@@ -748,22 +720,14 @@ def quote_attrib(inStr):
 def quote_python(inStr):
     s1 = inStr
     if s1.find("'") == -1:
-        if s1.find('\n') == -1:
-            return "'%s'" % s1
-        return "'''%s'''" % s1
-    else:
-        if s1.find('"') != -1:
-            s1 = s1.replace('"', '\\"')
-        if s1.find('\n') == -1:
-            return '"%s"' % s1
-        return '"""%s"""' % s1
+        return "'%s'" % s1 if s1.find('\n') == -1 else "'''%s'''" % s1
+    if s1.find('"') != -1:
+        s1 = s1.replace('"', '\\"')
+    return '"%s"' % s1 if s1.find('\n') == -1 else '"""%s"""' % s1
 
 
 def get_all_text_(node):
-    if node.text is not None:
-        text = node.text
-    else:
-        text = ''
+    text = node.text if node.text is not None else ''
     for child in node:
         if child.tail is not None:
             text += child.tail
@@ -841,24 +805,24 @@ class MixedContainer:
                 pretty_print=pretty_print)
     def exportSimple(self, outfile, level, name):
         if self.content_type == MixedContainer.TypeString:
-            outfile.write('<%s>%s</%s>' % (
-                self.name, self.value, self.name))
-        elif self.content_type == MixedContainer.TypeInteger or \
-                self.content_type == MixedContainer.TypeBoolean:
+            outfile.write(f'<{self.name}>{self.value}</{self.name}>')
+        elif self.content_type in [
+            MixedContainer.TypeInteger,
+            MixedContainer.TypeBoolean,
+        ]:
             outfile.write('<%s>%d</%s>' % (
                 self.name, self.value, self.name))
-        elif self.content_type == MixedContainer.TypeFloat or \
-                self.content_type == MixedContainer.TypeDecimal:
+        elif self.content_type in [
+            MixedContainer.TypeFloat,
+            MixedContainer.TypeDecimal,
+        ]:
             outfile.write('<%s>%f</%s>' % (
                 self.name, self.value, self.name))
         elif self.content_type == MixedContainer.TypeDouble:
             outfile.write('<%s>%g</%s>' % (
                 self.name, self.value, self.name))
         elif self.content_type == MixedContainer.TypeBase64:
-            outfile.write('<%s>%s</%s>' % (
-                self.name,
-                base64.b64encode(self.value),
-                self.name))
+            outfile.write(f'<{self.name}>{base64.b64encode(self.value)}</{self.name}>')
     def to_etree(self, element, mapping_=None, nsmap_=None):
         if self.category == MixedContainer.CategoryText:
             # Prevent exporting empty content as empty lines.
@@ -868,39 +832,38 @@ class MixedContainer:
                         element[-1].tail = self.value
                     else:
                         element[-1].tail += self.value
+                elif element.text is None:
+                    element.text = self.value
                 else:
-                    if element.text is None:
-                        element.text = self.value
-                    else:
-                        element.text += self.value
+                    element.text += self.value
         elif self.category == MixedContainer.CategorySimple:
-            subelement = etree_.SubElement(
-                element, '%s' % self.name)
+            subelement = etree_.SubElement(element, f'{self.name}')
             subelement.text = self.to_etree_simple()
         else:    # category == MixedContainer.CategoryComplex
             self.value.to_etree(element)
     def to_etree_simple(self, mapping_=None, nsmap_=None):
         if self.content_type == MixedContainer.TypeString:
             text = self.value
-        elif (self.content_type == MixedContainer.TypeInteger or
-                self.content_type == MixedContainer.TypeBoolean):
+        elif self.content_type in [
+            MixedContainer.TypeInteger,
+            MixedContainer.TypeBoolean,
+        ]:
             text = '%d' % self.value
-        elif (self.content_type == MixedContainer.TypeFloat or
-                self.content_type == MixedContainer.TypeDecimal):
+        elif self.content_type in [
+            MixedContainer.TypeFloat,
+            MixedContainer.TypeDecimal,
+        ]:
             text = '%f' % self.value
         elif self.content_type == MixedContainer.TypeDouble:
             text = '%g' % self.value
         elif self.content_type == MixedContainer.TypeBase64:
-            text = '%s' % base64.b64encode(self.value)
+            text = f'{base64.b64encode(self.value)}'
         return text
     def exportLiteral(self, outfile, level, name):
-        if self.category == MixedContainer.CategoryText:
-            showIndent(outfile, level)
-            outfile.write(
-                'model_.MixedContainer(%d, %d, "%s", "%s"),\n' % (
-                    self.category, self.content_type,
-                    self.name, self.value))
-        elif self.category == MixedContainer.CategorySimple:
+        if self.category in [
+            MixedContainer.CategoryText,
+            MixedContainer.CategorySimple,
+        ]:
             showIndent(outfile, level)
             outfile.write(
                 'model_.MixedContainer(%d, %d, "%s", "%s"),\n' % (
@@ -931,9 +894,7 @@ class MemberSpec_(object):
     def get_data_type_chain(self): return self.data_type
     def get_data_type(self):
         if isinstance(self.data_type, list):
-            if len(self.data_type) > 0:
-                return self.data_type[-1]
-            return 'xs:string'
+            return self.data_type[-1] if len(self.data_type) > 0 else 'xs:string'
         return self.data_type
     def set_container(self, container): self.container = container
     def get_container(self): return self.container
@@ -946,9 +907,7 @@ class MemberSpec_(object):
 
 
 def _cast(typ, value):
-    if typ is None or value is None:
-        return value
-    return typ(value)
+    return value if typ is None or value is None else typ(value)
 
 #
 # Data representation classes.
@@ -999,20 +958,17 @@ class DoxygenType(GeneratedsSuper):
         self.ns_prefix_ = None
         self.version = _cast(None, version)
         self.version_nsprefix_ = None
-        if compound is None:
-            self.compound = []
-        else:
-            self.compound = compound
+        self.compound = [] if compound is None else compound
         self.compound_nsprefix_ = None
-    def factory(*args_, **kwargs_):
+    def factory(self, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
                 CurrentSubclassModule_, DoxygenType)
             if subclass is not None:
-                return subclass(*args_, **kwargs_)
+                return subclass(*self, **kwargs_)
         if DoxygenType.subclass:
-            return DoxygenType.subclass(*args_, **kwargs_)
-        return DoxygenType(*args_, **kwargs_)
+            return DoxygenType.subclass(*self, **kwargs_)
+        return DoxygenType(*self, **kwargs_)
     factory = staticmethod(factory)
     def get_ns_prefix_(self):
         return self.ns_prefix_
@@ -1033,45 +989,43 @@ class DoxygenType(GeneratedsSuper):
     def set_version(self, version):
         self.version = version
     def hasContent_(self):
-        if (
-            self.compound
-        ):
-            return True
-        return False
+        return bool(self.compound)
     def export(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='DoxygenType', pretty_print=True):
         imported_ns_def_ = GenerateDSNamespaceDefs_.get('DoxygenType')
         if imported_ns_def_ is not None:
             namespacedef_ = imported_ns_def_
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
+        eol_ = '\n' if pretty_print else ''
         if self.original_tagname_ is not None and name_ == 'DoxygenType':
             name_ = self.original_tagname_
         if UseCapturedNS_ and self.ns_prefix_:
-            namespaceprefix_ = self.ns_prefix_ + ':'
+            namespaceprefix_ = f'{self.ns_prefix_}:'
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write(
+            f"<{namespaceprefix_}{name_}{namespacedef_ and f' {namespacedef_}' or ''}"
+        )
+
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='DoxygenType')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write(f'>{eol_}')
             self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='DoxygenType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
-            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+            outfile.write(f'</{namespaceprefix_}{name_}>{eol_}')
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write(f'/>{eol_}')
     def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='DoxygenType'):
         if self.version is not None and 'version' not in already_processed:
             already_processed.add('version')
             outfile.write(' version=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.version), input_name='version')), ))
     def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='DoxygenType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
+        eol_ = '\n' if pretty_print else ''
         for compound_ in self.compound:
-            namespaceprefix_ = self.compound_nsprefix_ + ':' if (UseCapturedNS_ and self.compound_nsprefix_) else ''
+            namespaceprefix_ = (
+                f'{self.compound_nsprefix_}:'
+                if (UseCapturedNS_ and self.compound_nsprefix_)
+                else ''
+            )
+
             compound_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='compound', pretty_print=pretty_print)
     def build(self, node, gds_collector_=None):
         self.gds_collector_ = gds_collector_
@@ -1114,20 +1068,17 @@ class CompoundType(GeneratedsSuper):
         self.kind_nsprefix_ = None
         self.name = name
         self.name_nsprefix_ = None
-        if member is None:
-            self.member = []
-        else:
-            self.member = member
+        self.member = [] if member is None else member
         self.member_nsprefix_ = None
-    def factory(*args_, **kwargs_):
+    def factory(self, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
                 CurrentSubclassModule_, CompoundType)
             if subclass is not None:
-                return subclass(*args_, **kwargs_)
+                return subclass(*self, **kwargs_)
         if CompoundType.subclass:
-            return CompoundType.subclass(*args_, **kwargs_)
-        return CompoundType(*args_, **kwargs_)
+            return CompoundType.subclass(*self, **kwargs_)
+        return CompoundType(*self, **kwargs_)
     factory = staticmethod(factory)
     def get_ns_prefix_(self):
         return self.ns_prefix_
@@ -1169,35 +1120,30 @@ class CompoundType(GeneratedsSuper):
                 self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on CompoundKind' % {"value" : encode_str_2_3(value), "lineno": lineno} )
                 result = False
     def hasContent_(self):
-        if (
-            self.name is not None or
-            self.member
-        ):
-            return True
-        return False
+        return bool((self.name is not None or self.member))
     def export(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='CompoundType', pretty_print=True):
         imported_ns_def_ = GenerateDSNamespaceDefs_.get('CompoundType')
         if imported_ns_def_ is not None:
             namespacedef_ = imported_ns_def_
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
+        eol_ = '\n' if pretty_print else ''
         if self.original_tagname_ is not None and name_ == 'CompoundType':
             name_ = self.original_tagname_
         if UseCapturedNS_ and self.ns_prefix_:
-            namespaceprefix_ = self.ns_prefix_ + ':'
+            namespaceprefix_ = f'{self.ns_prefix_}:'
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write(
+            f"<{namespaceprefix_}{name_}{namespacedef_ and f' {namespacedef_}' or ''}"
+        )
+
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='CompoundType')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write(f'>{eol_}')
             self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='CompoundType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
-            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+            outfile.write(f'</{namespaceprefix_}{name_}>{eol_}')
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write(f'/>{eol_}')
     def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='CompoundType'):
         if self.refid is not None and 'refid' not in already_processed:
             already_processed.add('refid')
@@ -1206,16 +1152,23 @@ class CompoundType(GeneratedsSuper):
             already_processed.add('kind')
             outfile.write(' kind=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.kind), input_name='kind')), ))
     def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='CompoundType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
         if self.name is not None:
-            namespaceprefix_ = self.name_nsprefix_ + ':' if (UseCapturedNS_ and self.name_nsprefix_) else ''
+            namespaceprefix_ = (
+                f'{self.name_nsprefix_}:'
+                if (UseCapturedNS_ and self.name_nsprefix_)
+                else ''
+            )
+
             showIndent(outfile, level, pretty_print)
+            eol_ = '\n' if pretty_print else ''
             outfile.write('<%sname>%s</%sname>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.name), input_name='name')), namespaceprefix_ , eol_))
         for member_ in self.member:
-            namespaceprefix_ = self.member_nsprefix_ + ':' if (UseCapturedNS_ and self.member_nsprefix_) else ''
+            namespaceprefix_ = (
+                f'{self.member_nsprefix_}:'
+                if (UseCapturedNS_ and self.member_nsprefix_)
+                else ''
+            )
+
             member_.export(outfile, level, namespaceprefix_, namespacedef_='', name_='member', pretty_print=pretty_print)
     def build(self, node, gds_collector_=None):
         self.gds_collector_ = gds_collector_
@@ -1269,15 +1222,15 @@ class MemberType(GeneratedsSuper):
         self.kind_nsprefix_ = None
         self.name = name
         self.name_nsprefix_ = None
-    def factory(*args_, **kwargs_):
+    def factory(self, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
                 CurrentSubclassModule_, MemberType)
             if subclass is not None:
-                return subclass(*args_, **kwargs_)
+                return subclass(*self, **kwargs_)
         if MemberType.subclass:
-            return MemberType.subclass(*args_, **kwargs_)
-        return MemberType(*args_, **kwargs_)
+            return MemberType.subclass(*self, **kwargs_)
+        return MemberType(*self, **kwargs_)
     factory = staticmethod(factory)
     def get_ns_prefix_(self):
         return self.ns_prefix_
@@ -1309,34 +1262,30 @@ class MemberType(GeneratedsSuper):
                 self.gds_collector_.add_message('Value "%(value)s"%(lineno)s does not match xsd enumeration restriction on MemberKind' % {"value" : encode_str_2_3(value), "lineno": lineno} )
                 result = False
     def hasContent_(self):
-        if (
-            self.name is not None
-        ):
-            return True
-        return False
+        return self.name is not None
     def export(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='MemberType', pretty_print=True):
         imported_ns_def_ = GenerateDSNamespaceDefs_.get('MemberType')
         if imported_ns_def_ is not None:
             namespacedef_ = imported_ns_def_
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
+        eol_ = '\n' if pretty_print else ''
         if self.original_tagname_ is not None and name_ == 'MemberType':
             name_ = self.original_tagname_
         if UseCapturedNS_ and self.ns_prefix_:
-            namespaceprefix_ = self.ns_prefix_ + ':'
+            namespaceprefix_ = f'{self.ns_prefix_}:'
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespaceprefix_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write(
+            f"<{namespaceprefix_}{name_}{namespacedef_ and f' {namespacedef_}' or ''}"
+        )
+
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespaceprefix_, name_='MemberType')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write(f'>{eol_}')
             self.exportChildren(outfile, level + 1, namespaceprefix_, namespacedef_, name_='MemberType', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
-            outfile.write('</%s%s>%s' % (namespaceprefix_, name_, eol_))
+            outfile.write(f'</{namespaceprefix_}{name_}>{eol_}')
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write(f'/>{eol_}')
     def exportAttributes(self, outfile, level, already_processed, namespaceprefix_='', name_='MemberType'):
         if self.refid is not None and 'refid' not in already_processed:
             already_processed.add('refid')
@@ -1345,13 +1294,15 @@ class MemberType(GeneratedsSuper):
             already_processed.add('kind')
             outfile.write(' kind=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.kind), input_name='kind')), ))
     def exportChildren(self, outfile, level, namespaceprefix_='', namespacedef_='', name_='MemberType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
         if self.name is not None:
-            namespaceprefix_ = self.name_nsprefix_ + ':' if (UseCapturedNS_ and self.name_nsprefix_) else ''
+            namespaceprefix_ = (
+                f'{self.name_nsprefix_}:'
+                if (UseCapturedNS_ and self.name_nsprefix_)
+                else ''
+            )
+
             showIndent(outfile, level, pretty_print)
+            eol_ = '\n' if pretty_print else ''
             outfile.write('<%sname>%s</%sname>%s' % (namespaceprefix_ , self.gds_encode(self.gds_format_string(quote_xml(self.name), input_name='name')), namespaceprefix_ , eol_))
     def build(self, node, gds_collector_=None):
         self.gds_collector_ = gds_collector_
@@ -1417,10 +1368,10 @@ def get_required_ns_prefix_defs(rootNode):
         for (prefix, uri) in node.nsmap.items()
         if prefix is not None
     }
-    namespacedefs = ' '.join([
-        'xmlns:{}="{}"'.format(prefix, uri)
-        for prefix, uri in nsmap.items()
-    ])
+    namespacedefs = ' '.join(
+        [f'xmlns:{prefix}="{uri}"' for prefix, uri in nsmap.items()]
+    )
+
     return nsmap, namespacedefs
 
 
@@ -1449,8 +1400,10 @@ def parse(inFileName, silence=False, print_warnings=True):
     if print_warnings and len(gds_collector.get_messages()) > 0:
         separator = ('-' * 50) + '\n'
         sys.stderr.write(separator)
-        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
-            len(gds_collector.get_messages()), ))
+        sys.stderr.write(
+            f'----- Warnings -- count: {len(gds_collector.get_messages())} -----\n'
+        )
+
         gds_collector.write_messages(sys.stderr)
         sys.stderr.write(separator)
     return rootObj
@@ -1486,8 +1439,10 @@ def parseEtree(inFileName, silence=False, print_warnings=True,
     if print_warnings and len(gds_collector.get_messages()) > 0:
         separator = ('-' * 50) + '\n'
         sys.stderr.write(separator)
-        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
-            len(gds_collector.get_messages()), ))
+        sys.stderr.write(
+            f'----- Warnings -- count: {len(gds_collector.get_messages())} -----\n'
+        )
+
         gds_collector.write_messages(sys.stderr)
         sys.stderr.write(separator)
     return rootObj, rootElement, mapping, reverse_mapping
@@ -1521,8 +1476,10 @@ def parseString(inString, silence=False, print_warnings=True):
     if print_warnings and len(gds_collector.get_messages()) > 0:
         separator = ('-' * 50) + '\n'
         sys.stderr.write(separator)
-        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
-            len(gds_collector.get_messages()), ))
+        sys.stderr.write(
+            f'----- Warnings -- count: {len(gds_collector.get_messages())} -----\n'
+        )
+
         gds_collector.write_messages(sys.stderr)
         sys.stderr.write(separator)
     return rootObj
@@ -1552,8 +1509,10 @@ def parseLiteral(inFileName, silence=False, print_warnings=True):
     if print_warnings and len(gds_collector.get_messages()) > 0:
         separator = ('-' * 50) + '\n'
         sys.stderr.write(separator)
-        sys.stderr.write('----- Warnings -- count: {} -----\n'.format(
-            len(gds_collector.get_messages()), ))
+        sys.stderr.write(
+            f'----- Warnings -- count: {len(gds_collector.get_messages())} -----\n'
+        )
+
         gds_collector.write_messages(sys.stderr)
         sys.stderr.write(separator)
     return rootObj

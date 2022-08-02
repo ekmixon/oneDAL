@@ -144,8 +144,8 @@ def make_report(algs_filename, report_filename, device=None, consider_fails=Fals
         algs = file_algs.read().split("\n")
     algs.remove("")
 
-    report_file = open(report_filename,'wt')
-    textHTML = """<html>
+    with open(report_filename,'wt') as report_file:
+        textHTML = """<html>
         <head>
         <title>
             Report of conformance testing
@@ -154,56 +154,53 @@ def make_report(algs_filename, report_filename, device=None, consider_fails=Fals
         <body>
             <p>
             Start of testing in """ + str(datetime.now())+ "<br>"
-    report_file.write(textHTML)
+        report_file.write(textHTML)
 
-    globalCalls = CallCounter()
-    parser = LineParser(device, consider_fails)
+        globalCalls = CallCounter()
+        parser = LineParser(device, consider_fails)
 
-    for alg_name in algs:
-        parser.clearCounters()
-        report_file.write("<br><h2>Testing %s</h2>" % alg_name)
+        for alg_name in algs:
+            parser.clearCounters()
+            report_file.write(f"<br><h2>Testing {alg_name}</h2>")
 
-        log_filename = "_log_%s.txt" % alg_name
-        log_file = open(log_filename, "r")
-        lines = log_file.readlines()
-        log_file.close()
+            log_filename = f"_log_{alg_name}.txt"
+            with open(log_filename, "r") as log_file:
+                lines = log_file.readlines()
+            result_str = ""
 
-        result_str = ""
+            for line in lines:
+                if '====' in line and 'test session starts' not in line:
+                    break
+                parser.parseLine(line)
 
-        for line in lines:
-            if '====' in line and not 'test session starts' in line:
-                break
-            parser.parseLine(line)
+            for line in reversed(lines):
+                if '=====' in line:
+                    if 'test session starts' in line:
+                        raise Exception(f'Found an error while testing {alg_name}')
+                    result_str = line
+                    break
 
-        for line in reversed(lines):
-            if '=====' in line:
-                if 'test session starts' in line:
-                    raise Exception('Found an error while testing %s' % (alg_name))
-                result_str = line
-                break
+            globalCalls.inc(parser.algoCalls)
 
-        globalCalls.inc(parser.algoCalls)
+            if parser.algoCalls.sklearnexCalls == 0 and parser.algoCalls.sklearnCalls == 0 and parser.algoCalls.sklearnexFailCalls == 0:
+                raise Exception(f'Algorithm {alg_name} has never been called')
 
-        if parser.algoCalls.sklearnexCalls == 0 and parser.algoCalls.sklearnCalls == 0 and parser.algoCalls.sklearnexFailCalls == 0:
-            raise Exception('Algorithm %s has never been called' % (alg_name))
+            print('*********************************************')
+            print(f'Algorithm: {alg_name}')
+            reportAlgText = make_summory(parser.algoCalls, device)
+            report_file.write(reportAlgText)
+            print(result_str)
+            report_file.write(f"{result_str}<br>")
 
         print('*********************************************')
-        print('Algorithm: %s' % alg_name)
-        reportAlgText = make_summory(parser.algoCalls, device)
-        report_file.write(reportAlgText)
-        print(result_str)
-        report_file.write(result_str + "<br>")
+        print('Summary')
+        report_file.write("<br><h1>Summary</h1>")
+        summaryText = make_summory(globalCalls, device)
+        report_file.write(summaryText)
 
-    print('*********************************************')
-    print('Summary')
-    report_file.write("<br><h1>Summary</h1>")
-    summaryText = make_summory(globalCalls, device)
-    report_file.write(summaryText)
-
-    textHTML = """<br>
+        textHTML = """<br>
     Finishing testing in """+str(datetime.now())+"""<br></p>
         </body>
     </html>"""
 
-    report_file.write(textHTML)
-    report_file.close()
+        report_file.write(textHTML)

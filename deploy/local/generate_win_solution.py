@@ -58,8 +58,10 @@ class cd:
 
 def get_template(config, template_extension):
     template_base_name = config.template_name
-    template_name = os.path.join(config.examples_dir, '{}.{}.tpl'.format(
-        template_base_name, template_extension))
+    template_name = os.path.join(
+        config.examples_dir, f'{template_base_name}.{template_extension}.tpl'
+    )
+
     return open(template_name, 'r').read()
 
 def write_file(root_dir, filename, content):
@@ -74,14 +76,19 @@ def write_proj(config, example_name, proj, proj_filters, proj_user):
     proj_dir = os.path.join(config.output_dir, 'vcproj', example_name)
     if not os.path.exists(proj_dir):
         os.makedirs(proj_dir)
-    print('Write {}.vcxproj'.format(example_name))
+    print(f'Write {example_name}.vcxproj')
     if not config.test:
-        write_file(proj_dir, example_name + '.vcxproj', proj)
-        write_file(proj_dir, example_name + '.vcxproj.filters', proj_filters)
-        write_file(proj_dir, example_name + '.vcxproj.user', proj_user)
+        write_file(proj_dir, f'{example_name}.vcxproj', proj)
+        write_file(proj_dir, f'{example_name}.vcxproj.filters', proj_filters)
+        write_file(proj_dir, f'{example_name}.vcxproj.user', proj_user)
 
 def generate_sln(config, examples_info):
-    solution_guid = '{' + '{}'.format(uuid.uuid3(uuid.NAMESPACE_URL, config.solution_name)).upper() + '}'
+    solution_guid = (
+        '{'
+        + f'{uuid.uuid3(uuid.NAMESPACE_URL, config.solution_name)}'.upper()
+        + '}'
+    )
+
     all_project_decls = []
     all_platform_decl = []
     for name, guid in examples_info:
@@ -101,14 +108,19 @@ def generate_sln(config, examples_info):
         project_decl = all_project_decls_str,
         platform_decl = all_platform_decl_str
     )
-    print('Write {}'.format(config.solution_name))
+    print(f'Write {config.solution_name}')
     if not config.test:
         write_file(config.output_dir, config.solution_name, solution)
 
 def generate_proj(config, relative_example_path):
     example_name = get_example_name(relative_example_path)
     normalized_example_path = relative_example_path.replace('/', '\\')
-    guid = '{' + '{}'.format(uuid.uuid3(uuid.NAMESPACE_URL, relative_example_path)).upper() + '}'
+    guid = (
+        '{'
+        + f'{uuid.uuid3(uuid.NAMESPACE_URL, relative_example_path)}'.upper()
+        + '}'
+    )
+
     proj = get_template(config, 'vcxproj').format(
         example_guid = guid,
         example_name = example_name,

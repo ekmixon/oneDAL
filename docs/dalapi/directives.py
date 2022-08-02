@@ -58,20 +58,21 @@ class DoxyDirective(MacroDirective):
     def format_description(self, desc_def):
         rst = ''
         for run in desc_def.runs:
-            if run.kind == 'text':
-                rst += run.content
+            if run.kind == 'code':
+                rst += (
+                    f'{run.directive}`{run.content}`'
+                    if hasattr(run, 'directive')
+                    else f'`{run.content}`'
+                )
+
             elif run.kind == 'math':
                 rst += f':math:`{run.content}`'
-            elif run.kind == 'code':
-                if hasattr(run, 'directive'):
-                    rst += f'{run.directive}`{run.content}`'
-                else:
-                    rst += f'`{run.content}`'
+            elif run.kind == 'text':
+                rst += run.content
         return rst.strip()
 
     def add_description(self, description, x: RstBuilder, level=0):
-        desc_str = self.format_description(description)
-        if desc_str:
+        if desc_str := self.format_description(description):
             x.add_doc(desc_str, level=level)
 
     def add_function_base(self, func, x: RstBuilder, is_free=True, level=0):
@@ -99,21 +100,21 @@ class DoxyDirective(MacroDirective):
         if invariants:
             x('Invariants', level=level)
             for invariant in invariants:
-                x.add(f'| ' + self.format_description(invariant), level=level + 1)
+                x.add(f'| {self.format_description(invariant)}', level=level + 1)
             x.add_blank_line()
 
     def add_preconditions(self, preconditions, x: RstBuilder, level=0):
         if preconditions:
             x('Preconditions', level=level)
             for precondition in preconditions:
-                x.add(f'| ' + self.format_description(precondition), level=level + 1)
+                x.add(f'| {self.format_description(precondition)}', level=level + 1)
             x.add_blank_line()
 
     def add_postconditions(self, postconditions, x: RstBuilder, level=0):
         if postconditions:
             x('Postconditions', level=level)
             for postcondition in postconditions:
-                x.add(f'| ' + self.format_description(postcondition), level=level + 1)
+                x.add(f'| {self.format_description(postcondition)}', level=level + 1)
             x.add_blank_line()
 
 

@@ -40,8 +40,7 @@ class _NameTransformerPass(TransformerPass):
         self._transform_name(node, 'parent_fully_qualified_name')
 
     def _transform_name(self, node, attribute):
-        attr_value = getattr(node, attribute, None)
-        if attr_value:
+        if attr_value := getattr(node, attribute, None):
             transformed = self._name_transformer.transform(attr_value)
             setattr(node, attribute, transformed)
 

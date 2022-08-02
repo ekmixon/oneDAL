@@ -24,13 +24,10 @@ import glob
 
 def check_stop_list(path):
     exclude_list = ['jaccard_batch_app']
-    for exclude_name in exclude_list:
-        if exclude_name in path:
-            return False
-    return True
+    return all(exclude_name not in path for exclude_name in exclude_list)
 
 def get_rules_list(directory):
-    cpp_paths = glob.glob('{}/**/*.cpp'.format(directory))
+    cpp_paths = glob.glob(f'{directory}/**/*.cpp')
     relative_cpp_paths = [ os.path.join('source', os.path.relpath(x, directory)) for x in cpp_paths if check_stop_list(x)]
     exe_names =  [os.path.basename(x).replace('.cpp', '.exe') for x in cpp_paths if check_stop_list(x)]
     return list(zip(exe_names, relative_cpp_paths))

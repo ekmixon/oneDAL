@@ -36,14 +36,27 @@ if __name__ == "__main__":
 
     print("Confromance testing start")
     for alg_name in algs:
-        code = subprocess.call(["./download_tests.sh", "--alg-name", "%s" % (alg_name) ])
-        if code: raise Exception('Error while copying test files')
+        if code := subprocess.call(
+            ["./download_tests.sh", "--alg-name", f"{alg_name}"]
+        ):
+            raise Exception('Error while copying test files')
         print(alg_name)
 
-        alg_log = open("_log_%s.txt" % (alg_name), "w")
-        subprocess.call(["python", "-m", "sklearnex", "-m", "pytest", "-s", "--disable-warnings", "-v", "test_%s.py" % (alg_name)],
-                         stdout=alg_log)
-        alg_log.close()
+        with open(f"_log_{alg_name}.txt", "w") as alg_log:
+            subprocess.call(
+                [
+                    "python",
+                    "-m",
+                    "sklearnex",
+                    "-m",
+                    "pytest",
+                    "-s",
+                    "--disable-warnings",
+                    "-v",
+                    f"test_{alg_name}.py",
+                ],
+                stdout=alg_log,
+            )
 
     make_report(algs_filename=algs_filename,
                 report_filename = report_filename)

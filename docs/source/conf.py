@@ -39,10 +39,8 @@ sys.path.insert(0, os.path.abspath('../'))
 project = 'oneDAL'
 copyright = '2014 - 2021, Intel Corporation' # pylint: disable=redefined-builtin
 
-# The full version, including alpha/beta/rc tags
-# release = '2021'
-
-rst_prolog = """
+rst_prolog = (
+    """
 .. |short_name| replace:: oneDAL
 .. |product| replace:: oneDAL
 .. |namespace| replace:: daal
@@ -52,13 +50,12 @@ rst_prolog = """
 .. |base_tk| replace:: Intel\ |reg|\  oneAPI Base Toolkit
 .. |dpcpp| replace:: Intel\ |reg|\  oneAPI DPC++/C++ Compiler
 """
-
-if tags.has('use_intelname'):
-    # use supplied =t use_intelname
-    rst_prolog += ".. |full_name| replace:: Intel\ |reg|\  oneAPI Data Analytics Library"
-else:
-    rst_prolog += ".. |full_name| replace:: oneAPI Data Analytics Library"
-
+    + (
+        ".. |full_name| replace:: Intel\ |reg|\  oneAPI Data Analytics Library"
+        if tags.has('use_intelname')
+        else ".. |full_name| replace:: oneAPI Data Analytics Library"
+    )
+)
 
 # for substitutions in code blocks and sphinx-prompts:
 substitutions = [

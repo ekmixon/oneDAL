@@ -81,8 +81,7 @@ class PropertyTransformer(doxypy.TransformerPass):
         if info.getter.doc:
             for remark in info.getter.doc.remarks:
                 if len(remark.runs) == 1 and remark.runs[0].kind == 'text':
-                    match = cls._default_re.match(remark.runs[0].content)
-                    if match:
+                    if match := cls._default_re.match(remark.runs[0].content):
                         return match.group(1)
 
     @classmethod

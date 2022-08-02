@@ -56,14 +56,10 @@ class _ModelProperty(object):
         self._var_name = var_name
 
     def __get__(self, instance, owner):
-        if instance:
-            return getattr(instance, self._var_name)
-        return self
+        return getattr(instance, self._var_name) if instance else self
 
     def __set__(self, instance, value):
-        if instance:
-            return setattr(instance, self._var_name, value)
-        return self
+        return setattr(instance, self._var_name, value) if instance else self
 
 
 def model_object(cls):

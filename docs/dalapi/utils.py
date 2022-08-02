@@ -56,7 +56,7 @@ class FileModificationTimer(object):
 
     def __call__(self):
         mtimes = [os.path.getmtime(x) for x in self._get_files()]
-        return max(mtimes) if len(mtimes) > 0 else 0
+        return max(mtimes, default=0)
 
     def _get_files(self):
         if hasattr(self, '_base_dir'):
